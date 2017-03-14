@@ -26,8 +26,10 @@ struct file_operations onebyte_fops = {
 
 char *onebyte_data = NULL;
 char* msg_Ptr = NULL;
+bool readFirstChar = false;
 int onebyte_open(struct inode *inode, struct file *filep)
 {
+readFirstChar = false;
 printk(KERN_NOTICE "Open device");
 msg_Ptr = onebyte_data;
 return 0; // always successful
@@ -59,23 +61,25 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 
 	times++;
 
-
-/*
-	if (*onebyte_data == 0)
-		printk(KERN_NOTICE "Empty");
-		return 0;
-	put_user(onebyte_data, buf); */
 	return 1;
 /*please complete the function on your own*/
 }
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {	
-	char* new_data ;
-	printk("%s", buf);
-	printk("%d", count);
-	*onebyte_data = 'Y';
+	printk("count: %d\n", count);
+	printk("bf: %c\n", buf[0]);
+	printk("bool: %d\n", readFirstChar);
+	if (readFirstChar == false){
+		*(onebyte_data) = buf[0];
+		printk("data: %s\n", onebyte_data);
+		readFirstChar = true;
+	}
+	if (count>2){
+		printk(KERN_NOTICE "No more memory\n");
+		return -28;
+	} 
+	
     	return 1;
-/*please complete the function on your own*/
 }
 
 
