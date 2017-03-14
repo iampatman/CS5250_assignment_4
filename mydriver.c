@@ -18,16 +18,17 @@ size_t count, loff_t *f_pos);
 static void onebyte_exit(void);
 
 struct file_operations onebyte_fops = {
-read: onebyte_read,
-write: onebyte_write,
-open: onebyte_open,
-release: onebyte_release
+	read: onebyte_read,
+	write: onebyte_write,
+	open: onebyte_open,
+	release: onebyte_release
 };
 
 char *onebyte_data = NULL;
 
 int onebyte_open(struct inode *inode, struct file *filep)
 {
+printk(KERN_NOTICE "Open device");
 return 0; // always successful
 }
 
@@ -40,10 +41,21 @@ return 0; // always successful
 
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {
+	
+	printk(KERN_NOTICE "Read from device");
+	int read_result = copy_to_user(buf, onebyte_data, 1);
+    	if( read_result != 0 )
+        	return -EFAULT;    
+    	return 1;
 /*please complete the function on your own*/
 }
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {
+	printk( KERN_NOTICE "Write to device");
+    	if( copy_from_user(buf, onebyte_data, 1) != 0 )
+        	return -EFAULT;    
+
+    	return 1;
 /*please complete the function on your own*/
 }
 
