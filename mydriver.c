@@ -25,10 +25,11 @@ struct file_operations onebyte_fops = {
 };
 
 char *onebyte_data = NULL;
-
+char* msg_Ptr = NULL;
 int onebyte_open(struct inode *inode, struct file *filep)
 {
 printk(KERN_NOTICE "Open device");
+msg_Ptr = onebyte_data;
 return 0; // always successful
 }
 
@@ -38,28 +39,42 @@ return 0; // always successful
 }
 
 
+int times = 0;
+
 
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {
-	printk(KERN_NOTICE "Read from device");
-	if (*onebyte_data == 0)
+
+
+	printk(KERN_NOTICE "data: %s", msg_Ptr);
+	if (*msg_Ptr == 0)
 		return 0;
 
-	/* 
-	 * Actually put the data into the buffer 
-	 */
-	put_user(*(onebyte_data), buf);
-	onebyte_data++;
+	put_user(*(msg_Ptr), buf);
+	msg_Ptr++;
+	
+	
+
+	printk(KERN_NOTICE "Read from device %d", times);
+
+	times++;
+
+
+/*
+	if (*onebyte_data == 0)
+		printk(KERN_NOTICE "Empty");
+		return 0;
+	put_user(onebyte_data, buf); */
 	return 1;
 /*please complete the function on your own*/
 }
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
-{
-//	printk( KERN_NOTICE "Write to device");
-  //  	if( copy_from_user(buf, onebyte_data, 1) != 0 )
-    //    	return -EFAULT;    
-
-    	return -EINVAL;
+{	
+	char* new_data ;
+	printk("%s", buf);
+	printk("%d", count);
+	*onebyte_data = 'Y';
+    	return 1;
 /*please complete the function on your own*/
 }
 
@@ -85,7 +100,8 @@ static int onebyte_init(void)
 		return -ENOMEM;
 	}
 	// initialize the value to be X
-	*onebyte_data = 'X';
+	sprintf(onebyte_data, "X");
+	//*onebyte_data = 'X';
 	printk(KERN_ALERT "This is a onebyte device module\n");
 	return 0;
 }
