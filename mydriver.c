@@ -24,19 +24,19 @@ struct file_operations onebyte_fops = {
 	release: onebyte_release
 };
 
-char *onebyte_data = NULL;
+char* onebyte_data = NULL;
 char* msg_Ptr = NULL;
-bool readFirstChar = false;
+
 int onebyte_open(struct inode *inode, struct file *filep)
 {
-printk(KERN_NOTICE "Open device\n");
-msg_Ptr = onebyte_data;
-return 0; // always successful
+	printk(KERN_NOTICE "Open device\n");
+	msg_Ptr = onebyte_data;
+	return 0; // always successful
 }
 
 int onebyte_release(struct inode *inode, struct file *filep)
 {
-return 0; // always successful
+	return 0; // always successful
 }
 
 
@@ -45,17 +45,12 @@ int times = 0;
 
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {
-
-
 	printk(KERN_NOTICE "data: %s\n", msg_Ptr);
+	printk("count: %d\n", count);
 	if (*msg_Ptr == 0)
 		return 0;
-
 	put_user(*(msg_Ptr), buf);
 	msg_Ptr++;
-	
-	
-
 	printk(KERN_NOTICE "Read from device %d\n", times);
 
 	times++;
@@ -65,12 +60,15 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 }
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {	
-
+	printk("Write to device func called\n");
 	printk("count: %d\n", count);
-	printk("bf: %c\n", &buf);
-	*(onebyte_data) = buf;
-	get_user(onebyte_data[i], buf + f_pos);
+	printk("buffer: %c\n", buf[0]);
+	*msg_Ptr = buf[0];
+	if (count == 1){
+		*msg_Ptr = '\0';
+	}
 	printk("data: %s\n", onebyte_data);
+	msg_Ptr++;
 	if (count>1024*4-1){
 		printk(KERN_NOTICE "No more memory\n");
 		return -28;
@@ -94,7 +92,7 @@ static int onebyte_init(void)
 		onebyte_exit();
 		return -ENOMEM;
 	}
-	sprintf(onebyte_data, "Init content of 4MB device. Please use echo and cat to test. Author: Nguyen Trung");
+	sprintf(onebyte_data, "Init");
 	printk(KERN_ALERT "This is a 4MB device module\n");
 	return 0;
 }
