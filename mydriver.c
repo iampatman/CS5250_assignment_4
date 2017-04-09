@@ -9,7 +9,7 @@
 #include <linux/init.h>
 #define MAJOR_NUMBER 61
 
-
+#define BUF_LEN 1024*4
 int onebyte_open(struct inode *inode, struct file *filep);
 int onebyte_release(struct inode *inode, struct file *filep);
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos);
@@ -29,8 +29,7 @@ char* msg_Ptr = NULL;
 bool readFirstChar = false;
 int onebyte_open(struct inode *inode, struct file *filep)
 {
-readFirstChar = false;
-printk(KERN_NOTICE "Open device");
+printk(KERN_NOTICE "Open device\n");
 msg_Ptr = onebyte_data;
 return 0; // always successful
 }
@@ -48,7 +47,7 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {
 
 
-	printk(KERN_NOTICE "data: %s", msg_Ptr);
+	printk(KERN_NOTICE "data: %s\n", msg_Ptr);
 	if (*msg_Ptr == 0)
 		return 0;
 
@@ -57,7 +56,7 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 	
 	
 
-	printk(KERN_NOTICE "Read from device %d", times);
+	printk(KERN_NOTICE "Read from device %d\n", times);
 
 	times++;
 
@@ -66,15 +65,13 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 }
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {	
+
 	printk("count: %d\n", count);
-	printk("bf: %c\n", buf[0]);
-	printk("bool: %d\n", readFirstChar);
-	if (readFirstChar == false){
-		*(onebyte_data) = buf[0];
-		printk("data: %s\n", onebyte_data);
-		readFirstChar = true;
-	}
-	if (count>2){
+	printk("bf: %c\n", &buf);
+	*(onebyte_data) = buf;
+	get_user(onebyte_data[i], buf + f_pos);
+	printk("data: %s\n", onebyte_data);
+	if (count>1024*4-1){
 		printk(KERN_NOTICE "No more memory\n");
 		return -28;
 	} 
@@ -92,21 +89,13 @@ static int onebyte_init(void)
 	if (result < 0) {
 		return result;
 	}
-	// allocate one byte of memory for storage
-	// kmalloc is just like malloc, the second parameter is
-	// the type of memory to be allocated.
-	// To release the memory allocated by kmalloc, use kfree.
-	onebyte_data = kmalloc(sizeof(char), GFP_KERNEL);
+	onebyte_data = kmalloc(sizeof(char)*BUF_LEN, GFP_KERNEL);
 	if (!onebyte_data) {
 		onebyte_exit();
-		// cannot allocate memory
-		// return no memory error, negative signify a failure
 		return -ENOMEM;
 	}
-	// initialize the value to be X
-	sprintf(onebyte_data, "X");
-	//*onebyte_data = 'X';
-	printk(KERN_ALERT "This is a onebyte device module\n");
+	sprintf(onebyte_data, "Init content of 4MB device. Please use echo and cat to test. Author: Nguyen Trung");
+	printk(KERN_ALERT "This is a 4MB device module\n");
 	return 0;
 }
 
@@ -114,15 +103,13 @@ static int onebyte_init(void)
 
 static void onebyte_exit(void)
 {
-	// if the pointer is pointing to something
 	if (onebyte_data) {
-	// free the memory and assign the pointer to NULL
 		kfree(onebyte_data);
 		onebyte_data = NULL;
 	}
 	// unregister the device
 	unregister_chrdev(MAJOR_NUMBER, "onebyte");
-	printk(KERN_ALERT "Onebyte device module is unloaded\n");
+	printk(KERN_ALERT "4MB device module is unloaded\n");
 }
 
 
