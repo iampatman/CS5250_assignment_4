@@ -11,21 +11,24 @@ void test() {
     char s[3];
     memset(s, '2', sizeof(s));
     printf("s: %s\n",s);
+
+
+//test
+
+    
+
     printf("test begin!\n");
     k = lseek(lcd, 4, SEEK_CUR);
     printf("lseek = %d\n", k);
     k = write(lcd, s, sizeof(s));
     printf("written = %d\n", k);
-    k = lseek(lcd, 0, SEEK_SET);
-    printf("lseek = %d\n", k);
-/*
     k = lseek(lcd, 0, SEEK_END);
     printf("lseek = %d\n", k);
     k = lseek(lcd,-4, SEEK_END);
     printf("lseek = %d\n", k);
     k = lseek(lcd,-4,-1);
     printf("lseek = %d\n", k);
-*/
+
 }
 
 void initial(char i) {
