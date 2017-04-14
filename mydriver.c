@@ -15,18 +15,21 @@ int onebyte_release(struct inode *inode, struct file *filep);
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos);
 ssize_t onebyte_write(struct file *filep, const char *buf,
 size_t count, loff_t *f_pos);
+loff_t onebyte_lseek(struct file *filp, loff_t offset, int whence);
 static void onebyte_exit(void);
 
 struct file_operations onebyte_fops = {
 	read: onebyte_read,
 	write: onebyte_write,
 	open: onebyte_open,
-	release: onebyte_release
+	release: onebyte_release,
+	llseek: onebyte_lseek
+
 };
 
 char* onebyte_data = NULL;
 char* msg_Ptr = NULL;
-
+int current_size = 0;
 int onebyte_open(struct inode *inode, struct file *filep)
 {
 	printk(KERN_NOTICE "Open device\n");
@@ -104,6 +107,47 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
 	return i;
 }
 
+
+loff_t onebyte_lseek(struct file *file, loff_t offset, int whence)
+{
+
+    printk("Llseek to device func called\n");
+            loff_t new_pos=0;
+	int bytes_read = 0;
+	msg_Ptr = onebyte_data;
+	while (*msg_Ptr)  {
+		msg_Ptr++;
+	    	bytes_read++;
+		printk("%c ", msg_Ptr[0]);
+	}
+
+printk("size: %d\n", bytes_read);
+            switch( whence )
+
+            {
+
+            case 0: 
+
+                        new_pos = offset;
+
+                        break;
+
+            case 1: 
+
+                        new_pos = file->f_pos + offset;
+
+                        break;
+
+            case 2: 
+
+                        new_pos = bytes_read - offset;
+                        break;
+            }          
+            if( new_pos > bytes_read ) new_pos = bytes_read;
+            if( new_pos < 0 ) new_pos = 0;
+            file->f_pos = new_pos;
+            return new_pos;
+}
 
 static int onebyte_init(void)
 {
