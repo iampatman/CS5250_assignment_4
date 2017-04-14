@@ -52,8 +52,8 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 
   	if (*msg_Ptr == 0)
 	    return 0;
-
-
+	
+	printk("offset: %d\n", *f_pos);
   	while (count && *msg_Ptr)  {
 
 	    	put_user(*(msg_Ptr++), buf++);
@@ -112,33 +112,33 @@ loff_t onebyte_lseek(struct file *file, loff_t offset, int whence)
 {
 
     printk("Llseek to device func called\n");
-            loff_t new_pos=0;
+        loff_t new_pos=0;
 	int bytes_read = 0;
 	msg_Ptr = onebyte_data;
 	while (*msg_Ptr)  {
 		msg_Ptr++;
 	    	bytes_read++;
-		printk("%c ", msg_Ptr[0]);
+		//printk("%c ", msg_Ptr[0]);
 	}
 
-printk("size: %d\n", bytes_read);
+	printk("size: %d\n", bytes_read);
             switch( whence )
 
             {
 
-            case 0: 
+            case 0: //SET
 
                         new_pos = offset;
 
                         break;
 
-            case 1: 
+            case 1: //CURRENT
 
                         new_pos = file->f_pos + offset;
 
                         break;
 
-            case 2: 
+            case 2: //END
 
                         new_pos = bytes_read - offset;
                         break;
@@ -146,6 +146,7 @@ printk("size: %d\n", bytes_read);
             if( new_pos > bytes_read ) new_pos = bytes_read;
             if( new_pos < 0 ) new_pos = 0;
             file->f_pos = new_pos;
+	printk("new position %d ", new_pos);
             return new_pos;
 }
 
@@ -163,7 +164,7 @@ static int onebyte_init(void)
 		onebyte_exit();
 		return -ENOMEM;
 	}
-	sprintf(onebyte_data, "Init");
+	sprintf(onebyte_data, "");
 	printk(KERN_ALERT "This is a 4MB device module\n");
 	return 0;
 }
