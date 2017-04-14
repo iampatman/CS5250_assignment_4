@@ -9,7 +9,7 @@
 #include <linux/init.h>
 #define MAJOR_NUMBER 61
 
-#define BUF_LEN 1024*4
+#define BUF_LEN 1024*4*2014
 int onebyte_open(struct inode *inode, struct file *filep);
 int onebyte_release(struct inode *inode, struct file *filep);
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos);
@@ -97,7 +97,7 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
     	return 1;
 */
 	int i;
-	for(i=0; i<4*1024 && i<count; i++)
+	for(i=0; i<BUF_LEN && i<count; i++)
     		get_user(msg_Ptr[i], buf+i);
 	onebyte_data = msg_Ptr;
 
