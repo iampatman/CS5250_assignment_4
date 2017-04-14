@@ -45,6 +45,23 @@ int times = 0;
 
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {
+	int bytes_read = 0;
+
+  	if (*msg_Ptr == 0)
+	    return 0;
+
+
+  	while (count && *msg_Ptr)  {
+
+	    	put_user(*(msg_Ptr++), buf++);
+	    	count--;
+	    	bytes_read++;
+
+	}
+	  	return bytes_read;
+}
+/*
+
 	printk(KERN_NOTICE "data: %s\n", msg_Ptr);
 	printk("count: %d\n", count);
 	if (*msg_Ptr == 0)
@@ -56,14 +73,17 @@ ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 	times++;
 
 	return 1;
-/*please complete the function on your own*/
-}
+*/
+
+
 ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {	
 	printk("Write to device func called\n");
 	printk("count: %d\n", count);
-	printk("buffer: %c\n", buf[0]);
+	printk("buffer: %s\n", buf);
+/*
 	*msg_Ptr = buf[0];
+
 	if (count == 1){
 		*msg_Ptr = '\0';
 	}
@@ -75,6 +95,13 @@ ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t 
 	} 
 	
     	return 1;
+*/
+	int i;
+	for(i=0; i<4*1024 && i<count; i++)
+    		get_user(msg_Ptr[i], buf+i);
+	onebyte_data = msg_Ptr;
+
+	return i;
 }
 
 
