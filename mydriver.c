@@ -9,7 +9,7 @@
 #include <linux/init.h>
 #define MAJOR_NUMBER 61
 
-#define BUF_LEN 1024*4*2014
+#define BUF_LEN 1024*4*1024
 int onebyte_open(struct inode *inode, struct file *filep);
 int onebyte_release(struct inode *inode, struct file *filep);
 ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos);
